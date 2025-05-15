@@ -1,0 +1,6 @@
+server:
+  port: 10150
+
+eureka:
+  client:
+    enabled: false

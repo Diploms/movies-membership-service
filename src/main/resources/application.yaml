@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: movies-membership-service
+  data:
+    redis:
+      port: ${REDIS_PORT:10152}
+      password: ${REDIS_USER_PASSWORD:pass}
+    mongodb:
+      uri: mongodb://localhost:10151/db
+      database: db
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: "http://localhost:8080/eureka"
+
+axon:
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson

@@ -1,0 +1,52 @@
+services:
+  redis:
+    image: redis:7.4.2
+    ports:
+      - "10152:6379"
+    environment:
+      - REDIS_PASSWORD=pass
+      - REDIS_USER=user
+      - REDIS_USER_PASSWORD=pass
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      interval: 45s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+  mongo:
+    image: mongo:8.0.9
+    command: --replSet rs0
+    environment:
+      MONGO_INITDB_DATABASE: db
+    healthcheck:
+      test: mongosh --eval 'db.runCommand("ping").ok' localhost:27017/test --quiet
+      interval: 2s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "10151:27017"
+    networks:
+      - comment_network
+
+  mongo-init:
+    image: mongo:8.0.9
+    depends_on:
+      - mongo
+    networks:
+      - comment_network
+    command: >
+      sh -c "sleep 5; mongosh --host mongo:27017 --eval '
+      rs.initiate( {
+        _id : \"rs0\",
+        members: [
+          { _id: 0, host: \"mongo:27017\" }
+        ]
+      })
+      '"
+
+networks:
+  comment_network:
+    driver: bridge
